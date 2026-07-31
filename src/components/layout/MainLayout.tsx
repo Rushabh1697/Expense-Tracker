@@ -29,11 +29,18 @@ export function MainLayout() {
   ]
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background relative z-0 overflow-hidden">
+      {/* Animated Background Orbs */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/15 blur-[120px] animate-blob" />
+        <div className="absolute top-[20%] -right-[10%] w-[40vw] h-[40vw] rounded-full bg-rose-600/10 blur-[120px] animate-blob" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-[10%] left-[20%] w-[60vw] h-[60vw] rounded-full bg-cyan-600/10 blur-[120px] animate-blob" style={{ animationDelay: '4s' }} />
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card hidden md:flex flex-col">
+      <aside className="w-64 border-r bg-card/50 backdrop-blur-xl hidden md:flex flex-col z-10">
         <div className="p-6">
-          <h1 className="text-2xl font-bold tracking-tight text-primary">Expense Tracker</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-primary">Expenzo</h1>
         </div>
         <nav className="space-y-1 px-4 flex-1">
           {navItems.map((item) => {
@@ -69,7 +76,7 @@ export function MainLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto flex flex-col relative pb-16 md:pb-0">
+      <main className="flex-1 overflow-auto flex flex-col relative pb-16 md:pb-0 z-10 bg-transparent">
         {!isOnline && (
           <div className="bg-amber-500/10 text-amber-500 text-xs text-center py-1 md:hidden">
             Offline Mode

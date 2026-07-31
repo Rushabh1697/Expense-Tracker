@@ -13,9 +13,9 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'My Expense Tracker',
-        short_name: 'ExpenseTrack',
-        description: 'Track your expenses, income, and savings goals offline and online.',
+        name: 'Expenzo',
+        short_name: 'Expenzo',
+        description: 'Track your expenses, income, and savings goals offline and online with Expenzo.',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
@@ -39,4 +39,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    sourcemap: true
+  }
 })

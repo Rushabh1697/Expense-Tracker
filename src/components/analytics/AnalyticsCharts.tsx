@@ -7,11 +7,24 @@ import {
   LineChart, Line
 } from "recharts"
 import { ArrowDownIcon, ArrowUpIcon, TrendingUp } from "lucide-react"
-import { motion } from "framer-motion"
-import CountUp from "react-countup"
+import { motion, useSpring, useTransform } from "framer-motion"
+import { useEffect } from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { db } from "@/lib/db"
+
+function AnimatedNumber({ value, prefix = "", decimals = 0 }: { value: number, prefix?: string, decimals?: number }) {
+  const spring = useSpring(0, { stiffness: 50, damping: 20 })
+  const display = useTransform(spring, (current) => {
+    return prefix + current.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  })
+
+  useEffect(() => {
+    spring.set(value)
+  }, [spring, value])
+
+  return <motion.span>{display}</motion.span>
+}
 
 type Period = "week" | "month" | "year"
 const periodLabels = ["Weekly", "Monthly", "Yearly"] as const
@@ -143,7 +156,7 @@ export function AnalyticsCharts() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-500 [text-shadow:0_0_10px_rgba(16,185,129,0.3)]">
-              +<CountUp end={currentIncome} prefix="₹" decimals={2} duration={1.5} separator="," />
+              +<AnimatedNumber value={currentIncome} prefix="₹" decimals={2} />
             </div>
             <p className="text-xs text-muted-foreground">In selected period</p>
           </CardContent>
@@ -154,7 +167,7 @@ export function AnalyticsCharts() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive [text-shadow:0_0_10px_rgba(244,63,94,0.3)]">
-              -<CountUp end={currentExpenses} prefix="₹" decimals={2} duration={1.5} separator="," />
+              -<AnimatedNumber value={currentExpenses} prefix="₹" decimals={2} />
             </div>
             <div className="flex items-center mt-1">
               {expenseChange > 0 ? (
@@ -163,7 +176,7 @@ export function AnalyticsCharts() {
                 <ArrowDownIcon className="h-4 w-4 text-emerald-500 mr-1" />
               )}
               <p className="text-xs text-muted-foreground">
-                <CountUp end={Math.abs(expenseChange)} decimals={1} duration={1} />% from previous {period}
+                <AnimatedNumber value={Math.abs(expenseChange)} decimals={1} />% from previous {period}
               </p>
             </div>
           </CardContent>
@@ -174,7 +187,7 @@ export function AnalyticsCharts() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${netSavings >= 0 ? "text-emerald-500 [text-shadow:0_0_10px_rgba(16,185,129,0.3)]" : "text-destructive [text-shadow:0_0_10px_rgba(244,63,94,0.3)]"}`}>
-              {netSavings >= 0 ? "+" : "-"}<CountUp end={Math.abs(netSavings)} prefix="₹" decimals={2} duration={1.5} separator="," />
+              {netSavings >= 0 ? "+" : "-"}<AnimatedNumber value={Math.abs(netSavings)} prefix="₹" decimals={2} />
             </div>
             <p className="text-xs text-muted-foreground">Income minus expenses</p>
           </CardContent>
