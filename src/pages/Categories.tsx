@@ -14,7 +14,7 @@ export function Categories() {
     }
   }
 
-  const renderCategoryList = (type: "expense" | "income", title: string) => {
+  const renderCategoryList = (type: "expense" | "income" | "savings", title: string) => {
     const list = categories?.filter(c => c.type === type) || []
     
     return (
@@ -92,6 +92,7 @@ export function Categories() {
         <div className="space-y-8">
           {renderCategoryList("expense", "Expense Categories")}
           {renderCategoryList("income", "Income Categories")}
+          {renderCategoryList("savings", "Savings Categories")}
         </div>
       )}
     </div>

@@ -153,6 +153,7 @@ export function CategoryDialog({ category, mode = "create" }: { category?: Categ
                     <SelectContent>
                       <SelectItem value="expense">Expense</SelectItem>
                       <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

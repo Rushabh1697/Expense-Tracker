@@ -31,7 +31,7 @@ const transactionSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
   date: z.string(),
   categoryId: z.string().min(1, "Please select a category"),
-  type: z.enum(["expense", "income"]),
+  type: z.enum(["expense", "income", "savings"]),
   note: z.string().optional(),
 })
 
@@ -106,6 +106,7 @@ export function TransactionDialog() {
                     <SelectContent>
                       <SelectItem value="expense">Expense</SelectItem>
                       <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
