@@ -7,15 +7,19 @@ import {
   LineChart, Line
 } from "recharts"
 import { ArrowDownIcon, ArrowUpIcon, TrendingUp } from "lucide-react"
+import { motion } from "framer-motion"
+import CountUp from "react-countup"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { db } from "@/lib/db"
 
 type Period = "week" | "month" | "year"
+const periodLabels = ["Weekly", "Monthly", "Yearly"] as const
+type PeriodLabel = typeof periodLabels[number]
 
 export function AnalyticsCharts() {
-  const [period, setPeriod] = useState<Period>("month")
+  const [activeTab, setActiveTab] = useState<PeriodLabel>("Monthly")
+  const period: Period = activeTab === "Weekly" ? "week" : activeTab === "Monthly" ? "month" : "year"
   
   const transactions = useLiveQuery(() => db.transactions.toArray())
   const categories = useLiveQuery(() => db.categories.toArray())
@@ -81,32 +85,55 @@ export function AnalyticsCharts() {
 
     const timeSeriesData = Object.values(timeSeriesDataMap)
 
+    // Cumulative Savings logic for Line Chart
+    let cumulative = 0
+    const sortedTimeSeriesData = timeSeriesData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const cumulativeData = sortedTimeSeriesData.map(d => {
+      cumulative += d.savings
+      return { ...d, cumulativeSavings: cumulative }
+    })
+
     return {
       currentExpenses,
       currentIncome,
       expenseChange,
       pieData,
-      timeSeriesData,
+      timeSeriesData: cumulativeData,
       topCategory,
     }
   }, [transactions, categories, period])
 
-  if (!analyticsData) return <div className="h-[400px] rounded-xl border bg-card/50 animate-pulse" />
+  if (!analyticsData) return <div className="h-[400px] rounded-xl border border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] animate-pulse" />
 
   const { currentExpenses, currentIncome, expenseChange, pieData, timeSeriesData, topCategory } = analyticsData
   const netSavings = currentIncome - currentExpenses
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-xl font-semibold">Overview</h3>
-        <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)} className="w-[400px]">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="week">Weekly</TabsTrigger>
-            <TabsTrigger value="month">Monthly</TabsTrigger>
-            <TabsTrigger value="year">Yearly</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        
+        {/* Sliding Pill Navigation */}
+        <div className="flex bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-white/10 p-1 rounded-full relative overflow-hidden">
+          {periodLabels.map(tab => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative px-5 py-1.5 text-sm font-medium transition-colors z-10 ${
+                activeTab === tab ? "text-white" : "text-muted-foreground hover:text-white"
+              }`}
+            >
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="absolute inset-0 bg-primary rounded-full -z-10 shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+              )}
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -115,7 +142,9 @@ export function AnalyticsCharts() {
             <CardTitle className="text-sm font-medium">Total Income</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">+${currentIncome.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-emerald-500 [text-shadow:0_0_10px_rgba(16,185,129,0.3)]">
+              +<CountUp end={currentIncome} prefix="₹" decimals={2} duration={1.5} separator="," />
+            </div>
             <p className="text-xs text-muted-foreground">In selected period</p>
           </CardContent>
         </Card>
@@ -124,7 +153,9 @@ export function AnalyticsCharts() {
             <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">-${currentExpenses.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-destructive [text-shadow:0_0_10px_rgba(244,63,94,0.3)]">
+              -<CountUp end={currentExpenses} prefix="₹" decimals={2} duration={1.5} separator="," />
+            </div>
             <div className="flex items-center mt-1">
               {expenseChange > 0 ? (
                 <ArrowUpIcon className="h-4 w-4 text-destructive mr-1" />
@@ -132,7 +163,7 @@ export function AnalyticsCharts() {
                 <ArrowDownIcon className="h-4 w-4 text-emerald-500 mr-1" />
               )}
               <p className="text-xs text-muted-foreground">
-                {Math.abs(expenseChange).toFixed(1)}% from previous {period}
+                <CountUp end={Math.abs(expenseChange)} decimals={1} duration={1} />% from previous {period}
               </p>
             </div>
           </CardContent>
@@ -142,8 +173,8 @@ export function AnalyticsCharts() {
             <CardTitle className="text-sm font-medium">Net Savings</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${netSavings >= 0 ? "text-emerald-500" : "text-destructive"}`}>
-              {netSavings >= 0 ? "+" : "-"}${Math.abs(netSavings).toFixed(2)}
+            <div className={`text-2xl font-bold ${netSavings >= 0 ? "text-emerald-500 [text-shadow:0_0_10px_rgba(16,185,129,0.3)]" : "text-destructive [text-shadow:0_0_10px_rgba(244,63,94,0.3)]"}`}>
+              {netSavings >= 0 ? "+" : "-"}<CountUp end={Math.abs(netSavings)} prefix="₹" decimals={2} duration={1.5} separator="," />
             </div>
             <p className="text-xs text-muted-foreground">Income minus expenses</p>
           </CardContent>
@@ -154,7 +185,7 @@ export function AnalyticsCharts() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{topCategory}</div>
+            <div className="text-2xl font-bold truncate">{topCategory}</div>
             <p className="text-xs text-muted-foreground">Highest expense area</p>
           </CardContent>
         </Card>
@@ -170,13 +201,29 @@ export function AnalyticsCharts() {
               {timeSeriesData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={timeSeriesData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
-                    <RechartsTooltip cursor={{ fill: 'rgba(0,0,0,0.1)' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.6)'}} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{fill: 'rgba(255,255,255,0.6)'}} />
+                    <RechartsTooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
                     <Legend />
-                    <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} name="Income" />
-                    <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} name="Expense" />
+                    <Bar 
+                      dataKey="income" 
+                      fill="#10B981" 
+                      radius={[4, 4, 0, 0]} 
+                      name="Income" 
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
+                    />
+                    <Bar 
+                      dataKey="expense" 
+                      fill="#F43F5E" 
+                      radius={[4, 4, 0, 0]} 
+                      name="Expense" 
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -204,12 +251,15 @@ export function AnalyticsCharts() {
                       outerRadius={90}
                       paddingAngle={2}
                       dataKey="value"
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <RechartsTooltip formatter={(val: any) => `$${Number(val).toFixed(2)}`} />
+                    <RechartsTooltip formatter={(val: any) => `₹${Number(val).toFixed(2)}`} contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -231,11 +281,22 @@ export function AnalyticsCharts() {
              {timeSeriesData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={timeSeriesData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
-                    <RechartsTooltip />
-                    <Line type="monotone" dataKey="savings" stroke="#3b82f6" strokeWidth={3} dot={false} name="Savings Transfers" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.6)'}} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{fill: 'rgba(255,255,255,0.6)'}} />
+                    <RechartsTooltip contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="cumulativeSavings" 
+                      stroke="#6366F1" 
+                      strokeWidth={4} 
+                      dot={{ r: 4, fill: "#6366F1", strokeWidth: 2, stroke: "#090D16" }} 
+                      activeDot={{ r: 6, fill: "#6366F1", strokeWidth: 0 }}
+                      name="Cumulative Savings" 
+                      isAnimationActive={true}
+                      animationDuration={2500}
+                      animationEasing="ease-in-out"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (

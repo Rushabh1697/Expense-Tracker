@@ -110,7 +110,7 @@ export function CalendarView() {
                       className="text-[10px] px-1.5 py-1 rounded truncate text-white shadow-sm flex justify-between"
                       style={{ backgroundColor: getCategoryColor(t.categoryId) }}
                     >
-                      <span>{t.type === 'expense' ? '-' : '+'}${t.amount}</span>
+                      <span>{t.type === 'expense' ? '-' : '+'}₹{t.amount}</span>
                     </div>
                   ))}
                   {dayTransactions.length > 4 && (
@@ -157,7 +157,7 @@ export function CalendarView() {
                       "font-semibold",
                       t.type === "expense" ? "text-destructive" : "text-emerald-500"
                     )}>
-                      {t.type === "expense" ? "-" : "+"}${t.amount.toFixed(2)}
+                      {t.type === "expense" ? "-" : "+"}₹{t.amount.toFixed(2)}
                     </span>
                   </div>
                 )

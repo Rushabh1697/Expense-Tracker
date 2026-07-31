@@ -48,25 +48,25 @@ export function SavingsGoalCard({ goal }: { goal: SavingsGoal }) {
         <div className="mt-6 text-center w-full space-y-1">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Current</span>
-            <span className="font-medium">${goal.currentAmount.toFixed(2)}</span>
+            <span className="font-medium">₹{goal.currentAmount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Target</span>
-            <span className="font-medium">${goal.targetAmount.toFixed(2)}</span>
+            <span className="font-medium">₹{goal.targetAmount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm pt-2 border-t mt-2">
             <span className="text-muted-foreground">Remaining</span>
-            <span className="font-semibold text-primary">${remaining.toFixed(2)}</span>
+            <span className="font-semibold text-primary">₹{remaining.toFixed(2)}</span>
           </div>
         </div>
       </CardContent>
       
       <CardFooter className="pt-2 flex gap-2">
         <Button variant="outline" className="flex-1" onClick={() => addFunds(-50)} disabled={goal.currentAmount <= 0}>
-          <Minus className="h-4 w-4 mr-1" /> $50
+          <Minus className="h-4 w-4 mr-1" /> ₹50
         </Button>
         <Button variant="outline" className="flex-1" onClick={() => addFunds(50)}>
-          <Plus className="h-4 w-4 mr-1" /> $50
+          <Plus className="h-4 w-4 mr-1" /> ₹50
         </Button>
       </CardFooter>
     </Card>

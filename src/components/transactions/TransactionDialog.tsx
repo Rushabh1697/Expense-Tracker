@@ -31,7 +31,7 @@ const transactionSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
   date: z.string(),
   categoryId: z.string().min(1, "Please select a category"),
-  type: z.enum(["expense", "income", "savings"]),
+  type: z.enum(["expense", "income"]),
   note: z.string().optional(),
 })
 
@@ -83,7 +83,7 @@ export function TransactionDialog() {
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
-            Record a new expense, income, or savings transfer.
+            Record a new expense or income.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -106,7 +106,6 @@ export function TransactionDialog() {
                     <SelectContent>
                       <SelectItem value="expense">Expense</SelectItem>
                       <SelectItem value="income">Income</SelectItem>
-                      <SelectItem value="savings">Savings</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -119,7 +118,7 @@ export function TransactionDialog() {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Amount (₹)</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.01" placeholder="0.00" {...field} />
                   </FormControl>

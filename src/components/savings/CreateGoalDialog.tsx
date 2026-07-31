@@ -95,7 +95,7 @@ export function CreateGoalDialog() {
               name="targetAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Target Amount ($)</FormLabel>
+                  <FormLabel>Target Amount (₹)</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.01" placeholder="0.00" {...field} />
                   </FormControl>
