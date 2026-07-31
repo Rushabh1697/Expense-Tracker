@@ -71,7 +71,7 @@ export function AnalyticsCharts() {
     
     // Category Breakdown (Pie Chart)
     const expensesByCategory = currentPeriodTxs
-      .filter(t => t.type === "expense")
+      .filter(t => t.type === "expense" || t.type === "savings")
       .reduce((acc, t) => {
         acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount
         return acc
@@ -199,7 +199,7 @@ export function AnalyticsCharts() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold truncate">{topCategory}</div>
-            <p className="text-xs text-muted-foreground">Highest expense area</p>
+            <p className="text-xs text-muted-foreground">Highest allocation area</p>
           </CardContent>
         </Card>
       </div>
@@ -207,7 +207,7 @@ export function AnalyticsCharts() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Income & Expenses Over Time</CardTitle>
+            <CardTitle>Income, Expenses & Savings Over Time</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] w-full">
@@ -237,6 +237,15 @@ export function AnalyticsCharts() {
                       animationDuration={1500}
                       animationEasing="ease-out"
                     />
+                    <Bar 
+                      dataKey="savings" 
+                      fill="#3B82F6" 
+                      radius={[4, 4, 0, 0]} 
+                      name="Savings" 
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -248,7 +257,7 @@ export function AnalyticsCharts() {
         
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Expenses by Category</CardTitle>
+            <CardTitle>Expenses & Savings by Category</CardTitle>
             <CardDescription>Breakdown of where your money goes</CardDescription>
           </CardHeader>
           <CardContent>
