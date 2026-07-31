@@ -29,6 +29,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.83.0",
+    "react-is": "^19.2.8",
     "react-router-dom": "^7.11.0",
     "recharts": "^3.10.1",
     "source-map": "^0.8.0",
