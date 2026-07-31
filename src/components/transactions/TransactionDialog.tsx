@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useLiveQuery } from "dexie-react-hooks"
-import { Plus } from "lucide-react"
+import { Plus, Edit2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { db } from "@/lib/db"
+import { db, type Transaction } from "@/lib/db"
 
 const transactionSchema = z.object({
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0."),
@@ -35,18 +35,18 @@ const transactionSchema = z.object({
   note: z.string().optional(),
 })
 
-export function TransactionDialog() {
+export function TransactionDialog({ transaction, mode = "create" }: { transaction?: Transaction, mode?: "create" | "edit" }) {
   const [open, setOpen] = useState(false)
   const categories = useLiveQuery(() => db.categories.toArray())
 
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      amount: 0,
-      date: new Date().toISOString().split("T")[0],
-      categoryId: "",
-      type: "expense",
-      note: "",
+      amount: transaction?.amount || 0,
+      date: transaction?.date || new Date().toISOString().split("T")[0],
+      categoryId: transaction?.categoryId?.toString() || "",
+      type: transaction?.type || "expense",
+      note: transaction?.note || "",
     },
   })
 
@@ -55,16 +55,27 @@ export function TransactionDialog() {
 
   async function onSubmit(values: z.infer<typeof transactionSchema>) {
     try {
-      await db.transactions.add({
-        amount: values.amount,
-        date: values.date,
-        categoryId: parseInt(values.categoryId, 10),
-        type: values.type,
-        note: values.note,
-        isSynced: false,
-        updatedAt: Date.now(),
-      })
-      form.reset()
+      if (mode === "create") {
+        await db.transactions.add({
+          amount: values.amount,
+          date: values.date,
+          categoryId: parseInt(values.categoryId, 10),
+          type: values.type as any,
+          note: values.note,
+          isSynced: false,
+          updatedAt: Date.now(),
+        })
+      } else if (transaction?.id) {
+        await db.transactions.update(transaction.id, {
+          amount: values.amount,
+          date: values.date,
+          categoryId: parseInt(values.categoryId, 10),
+          type: values.type as any,
+          note: values.note,
+          updatedAt: Date.now(),
+        })
+      }
+      if (mode === "create") form.reset()
       setOpen(false)
     } catch (error) {
       console.error("Failed to save transaction", error)
@@ -74,16 +85,22 @@ export function TransactionDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Transaction
-        </Button>
+        {mode === "create" ? (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+            <Edit2 className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>{mode === "create" ? "Add Transaction" : "Edit Transaction"}</DialogTitle>
           <DialogDescription>
-            Record a new expense or income.
+            {mode === "create" ? "Record a new expense, income, or savings." : "Update your transaction details."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

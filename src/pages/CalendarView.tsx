@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, addMonths, subMonths } from "date-fns"
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react"
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { db } from "@/lib/db"
@@ -39,6 +39,12 @@ export function CalendarView() {
 
   const selectedDateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""
   const selectedTransactions = transactionsByDate[selectedDateStr] || []
+
+  async function deleteTransaction(id: number) {
+    if (confirm("Are you sure you want to delete this transaction?")) {
+      await db.transactions.delete(id)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -153,12 +159,20 @@ export function CalendarView() {
                       </div>
                       {t.note && <span className="text-sm text-muted-foreground mt-1">{t.note}</span>}
                     </div>
-                    <span className={cn(
-                      "font-semibold",
-                      t.type === "expense" ? "text-destructive" : "text-emerald-500"
-                    )}>
-                      {t.type === "expense" ? "-" : "+"}₹{t.amount.toFixed(2)}
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className={cn(
+                        "font-semibold whitespace-nowrap",
+                        t.type === "expense" ? "text-destructive" : "text-emerald-500"
+                      )}>
+                        {t.type === "expense" ? "-" : "+"}₹{t.amount.toFixed(2)}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <TransactionDialog transaction={t} mode="edit" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteTransaction(t.id!)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )
               })
