@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { v4 as uuidv4 } from 'uuid'
 import { Plus } from 'lucide-react'
 
 import type { BankAccount } from '@/lib/db'
@@ -63,12 +64,15 @@ export function CreateAccountDialog({ account, mode = "create", trigger }: Creat
       if (mode === "edit" && account?.id) {
         await db.bankAccounts.update(account.id, {
           ...values,
+          isSynced: false,
           updatedAt: Date.now(),
         })
       } else {
         await db.bankAccounts.add({
+          id: uuidv4(),
           ...values,
           isSynced: false,
+          isDeleted: false,
           updatedAt: Date.now(),
         })
       }

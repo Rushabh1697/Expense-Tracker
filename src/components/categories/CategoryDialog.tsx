@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import * as Icons from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -74,11 +75,13 @@ export function CategoryDialog({ category, mode = "create" }: { category?: Categ
     try {
       if (mode === "create") {
         await db.categories.add({
+          id: uuidv4(),
           name: values.name,
           type: values.type,
           icon: values.icon,
           color: values.color,
           isSynced: false,
+          isDeleted: false,
           updatedAt: Date.now(),
         })
       } else if (category?.id) {
@@ -87,6 +90,7 @@ export function CategoryDialog({ category, mode = "create" }: { category?: Categ
           type: values.type,
           icon: values.icon,
           color: values.color,
+          isSynced: false,
           updatedAt: Date.now(),
         })
       }

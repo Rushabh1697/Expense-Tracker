@@ -57,7 +57,7 @@ export function BankAccountCard({ account }: BankAccountCardProps) {
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this bank account? This cannot be undone.")) {
       try {
-        await db.bankAccounts.delete(account.id!)
+        await db.bankAccounts.update(account.id!, { isDeleted: true, isSynced: false, updatedAt: Date.now() })
       } catch (error) {
         console.error("Failed to delete account:", error)
       }

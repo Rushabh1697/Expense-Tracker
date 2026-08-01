@@ -17,7 +17,7 @@ export function SavingsGoalCard({ goal }: { goal: SavingsGoal }) {
 
   async function deleteGoal() {
     if (confirm("Are you sure you want to delete this goal?")) {
-      await db.savingsGoals.delete(goal.id!)
+      await db.savingsGoals.update(goal.id!, { isDeleted: true, isSynced: false, updatedAt: Date.now() })
     }
   }
 

@@ -5,7 +5,7 @@ import { SavingsGoalCard } from "@/components/savings/SavingsGoalCard"
 import { PiggyBank } from "lucide-react"
 
 export function Savings() {
-  const goals = useLiveQuery(() => db.savingsGoals.toArray())
+  const goals = useLiveQuery(() => db.savingsGoals.filter(g => !g.isDeleted).toArray())
 
   return (
     <div className="space-y-6">

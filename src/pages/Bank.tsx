@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 
 export function Bank() {
-  const accounts = useLiveQuery(() => db.bankAccounts.toArray())
-  const transactions = useLiveQuery(() => db.transactions.toArray())
-  const categories = useLiveQuery(() => db.categories.toArray())
+  const accounts = useLiveQuery(() => db.bankAccounts.filter(a => !a.isDeleted).toArray())
+  const transactions = useLiveQuery(() => db.transactions.filter(t => !t.isDeleted).toArray())
+  const categories = useLiveQuery(() => db.categories.filter(c => !c.isDeleted).toArray())
 
   const bankTransactions = transactions?.filter(t => t.type === 'bank').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || []
 
@@ -74,7 +74,7 @@ export function Bank() {
           <h3 className="text-xl font-semibold mb-4">Recent Bank Transactions</h3>
           <div className="space-y-4">
             {bankTransactions.map(t => {
-              const cat = categories?.find(c => c.id === parseInt(t.categoryId.toString()))
+              const cat = categories?.find(c => c.id === t.categoryId)
               return (
                 <div key={t.id} className="flex justify-between items-center p-4 rounded-xl border bg-card/50">
                   <div className="flex flex-col">
@@ -100,7 +100,7 @@ export function Bank() {
                         className="h-8 w-8 text-destructive hover:bg-destructive/10" 
                         onClick={async () => {
                           if (confirm("Delete this bank transaction?")) {
-                            await db.transactions.delete(t.id!)
+                            await db.transactions.update(t.id!, { isDeleted: true, isSynced: false, updatedAt: Date.now() })
                           }
                         }}
                       >

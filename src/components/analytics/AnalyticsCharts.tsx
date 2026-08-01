@@ -34,8 +34,8 @@ export function AnalyticsCharts() {
   const [activeTab, setActiveTab] = useState<PeriodLabel>("Monthly")
   const period: Period = activeTab === "Weekly" ? "week" : activeTab === "Monthly" ? "month" : "year"
 
-  const transactions = useLiveQuery(() => db.transactions.toArray())
-  const categories = useLiveQuery(() => db.categories.toArray())
+  const transactions = useLiveQuery(() => db.transactions.filter(t => !t.isDeleted).toArray())
+  const categories = useLiveQuery(() => db.categories.filter(c => !c.isDeleted).toArray())
 
   const analyticsData = useMemo(() => {
     if (!transactions || !categories) return null
@@ -79,7 +79,7 @@ export function AnalyticsCharts() {
       
     const topCategoryEntry = Object.entries(topCategoryAcc).sort((a, b) => b[1] - a[1])[0]
     const topCategory = topCategoryEntry 
-      ? (categories.find(c => c.id === parseInt(topCategoryEntry[0]))?.name || "Unknown") 
+      ? (categories.find(c => c.id === topCategoryEntry[0])?.name || "Unknown") 
       : "N/A"
 
     // Pie Chart (Group by Type: Income, Expense, Savings)

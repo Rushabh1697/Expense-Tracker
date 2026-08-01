@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { v4 as uuidv4 } from "uuid"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -46,11 +47,11 @@ export function CreateGoalDialog() {
   async function onSubmit(values: z.infer<typeof goalSchema>) {
     try {
       await db.savingsGoals.add({
-        name: values.name,
-        targetAmount: values.targetAmount,
+        id: uuidv4(),
+        ...values,
         currentAmount: 0,
-        deadline: values.deadline,
         isSynced: false,
+        isDeleted: false,
         updatedAt: Date.now(),
       })
       form.reset()

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useLiveQuery } from "dexie-react-hooks"
 import { Plus, Edit2 } from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -57,21 +58,24 @@ export function TransactionDialog({ transaction, mode = "create" }: { transactio
     try {
       if (mode === "create") {
         await db.transactions.add({
+          id: uuidv4(),
           amount: values.amount,
           date: values.date,
-          categoryId: parseInt(values.categoryId, 10),
+          categoryId: values.categoryId,
           type: values.type as any,
           note: values.note,
           isSynced: false,
+          isDeleted: false,
           updatedAt: Date.now(),
         })
       } else if (transaction?.id) {
         await db.transactions.update(transaction.id, {
           amount: values.amount,
           date: values.date,
-          categoryId: parseInt(values.categoryId, 10),
+          categoryId: values.categoryId,
           type: values.type as any,
           note: values.note,
+          isSynced: false,
           updatedAt: Date.now(),
         })
       }

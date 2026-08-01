@@ -12,8 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const transactions = useLiveQuery(() => db.transactions.toArray())
-  const categories = useLiveQuery(() => db.categories.toArray())
+  const transactions = useLiveQuery(() => db.transactions.filter(t => !t.isDeleted).toArray())
+  const categories = useLiveQuery(() => db.categories.filter(c => !c.isDeleted).toArray())
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1))
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
@@ -32,17 +32,17 @@ export function CalendarView() {
     return acc
   }, {} as Record<string, typeof transactions>) || {}
 
-  const getCategoryColor = (categoryId: string | number) => {
-    const cat = categories?.find(c => c.id === parseInt(categoryId.toString()))
+  const getCategoryColor = (categoryId: string) => {
+    const cat = categories?.find(c => c.id === categoryId)
     return cat ? cat.color : "#94a3b8"
   }
 
   const selectedDateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""
   const selectedTransactions = transactionsByDate[selectedDateStr] || []
 
-  async function deleteTransaction(id: number) {
+  async function deleteTransaction(id: string) {
     if (confirm("Are you sure you want to delete this transaction?")) {
-      await db.transactions.delete(id)
+      await db.transactions.update(id, { isDeleted: true, isSynced: false, updatedAt: Date.now() })
     }
   }
 
@@ -143,7 +143,7 @@ export function CalendarView() {
               <p className="text-muted-foreground text-center py-8">No transactions on this day.</p>
             ) : (
               selectedTransactions.map((t, index) => {
-                const cat = categories?.find(c => c.id === parseInt(t.categoryId.toString()))
+                const cat = categories?.find(c => c.id === t.categoryId)
                 return (
                   <div key={index} className="flex justify-between items-center p-3 rounded-lg border bg-card">
                     <div className="flex flex-col">

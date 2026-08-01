@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { syncAll } from '@/lib/sync'
 
 interface AuthContextType {
   user: User | null
@@ -29,6 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+      if (session?.user) {
+        syncAll()
+      }
     })
 
     // Listen for auth changes
@@ -38,10 +42,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+      if (session?.user) {
+        syncAll()
+      }
     })
 
-    return () => subscription.unsubscribe()
-  }, [])
+    // Periodic sync every 30 seconds
+    const intervalId = setInterval(() => {
+      if (user) {
+        syncAll()
+      }
+    }, 30000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearInterval(intervalId)
+    }
+  }, [user])
 
   const signOut = async () => {
     await supabase.auth.signOut()

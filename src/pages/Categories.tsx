@@ -6,11 +6,11 @@ import * as Icons from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Categories() {
-  const categories = useLiveQuery(() => db.categories.toArray())
+  const categories = useLiveQuery(() => db.categories.filter(c => !c.isDeleted).toArray())
 
-  async function deleteCategory(id: number) {
+  async function deleteCategory(id: string) {
     if (confirm("Are you sure you want to delete this category?")) {
-      await db.categories.delete(id)
+      await db.categories.update(id, { isDeleted: true, isSynced: false, updatedAt: Date.now() })
     }
   }
 
