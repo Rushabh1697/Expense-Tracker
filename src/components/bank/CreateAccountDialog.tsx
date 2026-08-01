@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus, Edit } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import type { BankAccount } from '@/lib/db'
 
