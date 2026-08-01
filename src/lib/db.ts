@@ -6,7 +6,7 @@ export interface Transaction {
   amount: number;
   date: string;
   categoryId: number | string;
-  type: 'expense' | 'income' | 'savings';
+  type: 'expense' | 'income' | 'savings' | 'bank';
   note?: string;
   isSynced: boolean; // For offline sync support
   updatedAt: number;
@@ -17,7 +17,7 @@ export interface Category {
   name: string;
   icon: string; // Lucide icon name
   color: string;
-  type: 'expense' | 'income' | 'savings';
+  type: 'expense' | 'income' | 'savings' | 'bank';
   isSynced: boolean;
   updatedAt: number;
 }

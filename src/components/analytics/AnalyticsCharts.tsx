@@ -91,7 +91,7 @@ export function AnalyticsCharts() {
     // Time Series Data (Bar/Line Chart)
     const timeSeriesDataMap = currentPeriodTxs.reduce((acc, t) => {
       const dateKey = period === "year" ? format(new Date(t.date), "MMM yyyy") : format(new Date(t.date), "MMM dd")
-      if (!acc[dateKey]) acc[dateKey] = { date: dateKey, income: 0, expense: 0, savings: 0 }
+      if (!acc[dateKey]) acc[dateKey] = { date: dateKey, income: 0, expense: 0, savings: 0, bank: 0 }
       acc[dateKey][t.type] += t.amount
       return acc
     }, {} as Record<string, any>)
@@ -242,6 +242,15 @@ export function AnalyticsCharts() {
                       fill="#3B82F6" 
                       radius={[4, 4, 0, 0]} 
                       name="Savings" 
+                      isAnimationActive={true}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
+                    />
+                    <Bar 
+                      dataKey="bank" 
+                      fill="#8B5CF6" 
+                      radius={[4, 4, 0, 0]} 
+                      name="Bank" 
                       isAnimationActive={true}
                       animationDuration={1500}
                       animationEasing="ease-out"

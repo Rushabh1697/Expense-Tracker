@@ -52,7 +52,7 @@ const COLORS = [
 
 const categorySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  type: z.enum(["expense", "income", "savings"]),
+  type: z.enum(["expense", "income", "savings", "bank"]),
   icon: z.string(),
   color: z.string(),
 })
@@ -154,6 +154,7 @@ export function CategoryDialog({ category, mode = "create" }: { category?: Categ
                       <SelectItem value="expense">Expense</SelectItem>
                       <SelectItem value="income">Income</SelectItem>
                       <SelectItem value="savings">Savings</SelectItem>
+                      <SelectItem value="bank">Bank</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
