@@ -1,10 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Tags, PiggyBank, Calendar, Settings as SettingsIcon, Wifi, WifiOff } from 'lucide-react'
+import { LayoutDashboard, Tags, PiggyBank, Calendar, Settings as SettingsIcon, Wifi, WifiOff, Landmark, LogOut } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
+import { Button } from '@/components/ui/button'
 
 export function MainLayout() {
   const location = useLocation()
+  const { signOut } = useAuth()
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
@@ -23,6 +26,7 @@ export function MainLayout() {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Categories', path: '/categories', icon: Tags },
+    { name: 'Bank', path: '/bank', icon: Landmark },
     { name: 'Savings', path: '/savings', icon: PiggyBank },
     { name: 'Calendar', path: '/calendar', icon: Calendar },
     { name: 'Settings', path: '/settings', icon: SettingsIcon },
@@ -64,8 +68,12 @@ export function MainLayout() {
             )
           })}
         </nav>
-        <div className="p-4 border-t mt-auto">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="p-4 border-t mt-auto space-y-4">
+          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => signOut()}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
             {isOnline ? (
               <><Wifi className="h-4 w-4 text-emerald-500" /> <span>Online & Synced</span></>
             ) : (
@@ -89,7 +97,7 @@ export function MainLayout() {
 
       {/* Mobile Nav (Bottom Bar) */}
       <nav className="md:hidden fixed bottom-0 w-full border-t bg-card flex justify-around p-3 pb-safe z-50">
-        {navItems.map((item) => {
+        {navItems.slice(0, 5).map((item) => {
           const Icon = item.icon
           const isActive = location.pathname.startsWith(item.path)
           return (

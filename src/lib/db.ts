@@ -32,19 +32,30 @@ export interface SavingsGoal {
   updatedAt: number;
 }
 
+export interface BankAccount {
+  id?: number;
+  name: string;
+  balance: number;
+  accountType: 'checking' | 'savings' | 'credit' | 'other';
+  isSynced: boolean;
+  updatedAt: number;
+}
+
 export class ExpenseTrackerDB extends Dexie {
   transactions!: Table<Transaction, number>;
   categories!: Table<Category, number>;
   savingsGoals!: Table<SavingsGoal, number>;
+  bankAccounts!: Table<BankAccount, number>;
 
   constructor() {
     super('ExpenseTrackerDB');
     
     // Define tables and indexes
-    this.version(1).stores({
+    this.version(2).stores({
       transactions: '++id, date, categoryId, type, isSynced',
       categories: '++id, type, isSynced',
-      savingsGoals: '++id, isSynced'
+      savingsGoals: '++id, isSynced',
+      bankAccounts: '++id, isSynced'
     });
   }
 }
