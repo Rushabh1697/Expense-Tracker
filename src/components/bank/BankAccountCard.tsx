@@ -2,7 +2,8 @@ import { useState } from 'react'
 import type { BankAccount } from '@/lib/db'
 import { db } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Landmark, CreditCard, PiggyBank, Wallet, ArrowUpRight, ArrowDownRight, Edit2 } from 'lucide-react'
+import { Landmark, CreditCard, PiggyBank, Wallet, ArrowUpRight, ArrowDownRight, Edit2, Trash2 } from 'lucide-react'
+import { CreateAccountDialog } from './CreateAccountDialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -53,15 +54,39 @@ export function BankAccountCard({ account }: BankAccountCardProps) {
     }
   }
 
+  const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete this bank account? This cannot be undone.")) {
+      try {
+        await db.bankAccounts.delete(account.id!)
+      } catch (error) {
+        console.error("Failed to delete account:", error)
+      }
+    }
+  }
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-medium flex items-center gap-2">
           {getIcon()}
-          {account.name}
+          <span className="truncate max-w-[120px]">{account.name}</span>
         </CardTitle>
-        <div className="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-primary/10 text-primary">
-          {account.accountType}
+        <div className="flex items-center gap-1">
+          <div className="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-primary/10 text-primary hidden sm:block">
+            {account.accountType}
+          </div>
+          <CreateAccountDialog 
+            account={account} 
+            mode="edit" 
+            trigger={
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Edit2 className="h-3 w-3" />
+              </Button>
+            } 
+          />
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={handleDelete}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

@@ -2,10 +2,17 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
 import { CreateAccountDialog } from "@/components/bank/CreateAccountDialog"
 import { BankAccountCard } from "@/components/bank/BankAccountCard"
-import { Landmark } from "lucide-react"
+import { Landmark, Trash2 } from "lucide-react"
+import { TransactionDialog } from "@/components/transactions/TransactionDialog"
+import { Button } from "@/components/ui/button"
+import { format } from "date-fns"
 
 export function Bank() {
   const accounts = useLiveQuery(() => db.bankAccounts.toArray())
+  const transactions = useLiveQuery(() => db.transactions.toArray())
+  const categories = useLiveQuery(() => db.categories.toArray())
+
+  const bankTransactions = transactions?.filter(t => t.type === 'bank').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || []
 
   const totalBalance = accounts?.reduce((sum, account) => sum + account.balance, 0) || 0
 
@@ -59,6 +66,52 @@ export function Bank() {
           {accounts.map(account => (
             <BankAccountCard key={account.id} account={account} />
           ))}
+        </div>
+      )}
+
+      {bankTransactions.length > 0 && (
+        <div className="mt-12">
+          <h3 className="text-xl font-semibold mb-4">Recent Bank Transactions</h3>
+          <div className="space-y-4">
+            {bankTransactions.map(t => {
+              const cat = categories?.find(c => c.id === parseInt(t.categoryId.toString()))
+              return (
+                <div key={t.id} className="flex justify-between items-center p-4 rounded-xl border bg-card/50">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: cat?.color || "#ccc" }} 
+                      />
+                      <span className="font-medium">{cat?.name || "Unknown"}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{format(new Date(t.date), "MMM d, yyyy")}</span>
+                    </div>
+                    {t.note && <span className="text-sm text-muted-foreground mt-1">{t.note}</span>}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-semibold text-emerald-500">
+                      +₹{t.amount.toFixed(2)}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <TransactionDialog transaction={t} mode="edit" />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10" 
+                        onClick={async () => {
+                          if (confirm("Delete this bank transaction?")) {
+                            await db.transactions.delete(t.id!)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

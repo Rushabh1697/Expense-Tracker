@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus } from 'lucide-react'
+import { Plus, Edit } from 'lucide-react'
+
+import type { BankAccount } from '@/lib/db'
 
 import { db } from '@/lib/db'
 import { Button } from '@/components/ui/button'
@@ -38,45 +40,60 @@ const accountSchema = z.object({
   accountType: z.enum(['checking', 'savings', 'credit', 'other']),
 })
 
-export function CreateAccountDialog() {
+interface CreateAccountDialogProps {
+  account?: BankAccount;
+  mode?: "create" | "edit";
+  trigger?: React.ReactNode;
+}
+
+export function CreateAccountDialog({ account, mode = "create", trigger }: CreateAccountDialogProps) {
   const [open, setOpen] = useState(false)
   const form = useForm<z.infer<typeof accountSchema>>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
-      name: '',
-      accountNumber: '',
-      balance: 0,
-      accountType: 'checking',
+      name: account?.name || '',
+      accountNumber: account?.accountNumber || '',
+      balance: account?.balance || 0,
+      accountType: account?.accountType || 'checking',
     },
   })
 
   async function onSubmit(values: z.infer<typeof accountSchema>) {
     try {
-      await db.bankAccounts.add({
-        ...values,
-        isSynced: false,
-        updatedAt: Date.now(),
-      })
+      if (mode === "edit" && account?.id) {
+        await db.bankAccounts.update(account.id, {
+          ...values,
+          updatedAt: Date.now(),
+        })
+      } else {
+        await db.bankAccounts.add({
+          ...values,
+          isSynced: false,
+          updatedAt: Date.now(),
+        })
+      }
       setOpen(false)
-      form.reset()
+      if (mode === "create") form.reset()
     } catch (error) {
-      console.error('Failed to create account:', error)
+      console.error(`Failed to ${mode} account:`, error)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Account
-        </Button>
+        {trigger || (
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Account
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Bank Account</DialogTitle>
+          <DialogTitle>{mode === "create" ? "Add Bank Account" : "Edit Bank Account"}</DialogTitle>
           <DialogDescription>
-            Add a new bank account to keep track of its balance.
+            {mode === "create" ? "Add a new bank account to keep track of its balance." : "Update your bank account details."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -150,7 +167,7 @@ export function CreateAccountDialog() {
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Create Account</Button>
+              <Button type="submit">{mode === "create" ? "Create Account" : "Save Changes"}</Button>
             </div>
           </form>
         </Form>
