@@ -1,8 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useMemo, useState } from "react"
 import { format, subDays, subMonths, subYears, isAfter, isBefore } from "date-fns"
-import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, 
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
   LineChart, Line
 } from "recharts"
@@ -33,7 +33,7 @@ type PeriodLabel = typeof periodLabels[number]
 export function AnalyticsCharts() {
   const [activeTab, setActiveTab] = useState<PeriodLabel>("Monthly")
   const period: Period = activeTab === "Weekly" ? "week" : activeTab === "Monthly" ? "month" : "year"
-  
+
   const transactions = useLiveQuery(() => db.transactions.toArray())
   const categories = useLiveQuery(() => db.categories.toArray())
 
@@ -64,14 +64,14 @@ export function AnalyticsCharts() {
 
     const currentExpenses = currentPeriodTxs.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
     const currentIncome = currentPeriodTxs.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
-    
+
     const previousExpenses = previousPeriodTxs.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
-    
+
     const expenseChange = previousExpenses > 0 ? ((currentExpenses - previousExpenses) / previousExpenses) * 100 : 0
-    
+
     // Category Breakdown (Pie Chart)
     const expensesByCategory = currentPeriodTxs
-      .filter(t => t.type === "expense" || t.type === "savings")
+      .filter(t => t.type === "expense" || t.type === "income" || t.type === "bank")
       .reduce((acc, t) => {
         acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount
         return acc
@@ -125,16 +125,15 @@ export function AnalyticsCharts() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-xl font-semibold">Overview</h3>
-        
+
         {/* Sliding Pill Navigation */}
         <div className="flex bg-[rgba(255,255,255,0.03)] backdrop-blur-[16px] border border-white/10 p-1 rounded-full relative overflow-hidden">
           {periodLabels.map(tab => (
-            <button 
+            <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`relative px-5 py-1.5 text-sm font-medium transition-colors z-10 ${
-                activeTab === tab ? "text-white" : "text-muted-foreground hover:text-white"
-              }`}
+              className={`relative px-5 py-1.5 text-sm font-medium transition-colors z-10 ${activeTab === tab ? "text-white" : "text-muted-foreground hover:text-white"
+                }`}
             >
               {activeTab === tab && (
                 <motion.div
@@ -207,7 +206,7 @@ export function AnalyticsCharts() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Income, Expenses & Savings Over Time</CardTitle>
+            <CardTitle>Income, Expenses, Bank & Savings Over Time</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] w-full">
@@ -215,42 +214,42 @@ export function AnalyticsCharts() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={timeSeriesData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.6)'}} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{fill: 'rgba(255,255,255,0.6)'}} />
+                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
                     <RechartsTooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
                     <Legend />
-                    <Bar 
-                      dataKey="income" 
-                      fill="#10B981" 
-                      radius={[4, 4, 0, 0]} 
-                      name="Income" 
+                    <Bar
+                      dataKey="income"
+                      fill="#10B981"
+                      radius={[4, 4, 0, 0]}
+                      name="Income"
                       isAnimationActive={true}
                       animationDuration={1500}
                       animationEasing="ease-out"
                     />
-                    <Bar 
-                      dataKey="expense" 
-                      fill="#F43F5E" 
-                      radius={[4, 4, 0, 0]} 
-                      name="Expense" 
+                    <Bar
+                      dataKey="expense"
+                      fill="#F43F5E"
+                      radius={[4, 4, 0, 0]}
+                      name="Expense"
                       isAnimationActive={true}
                       animationDuration={1500}
                       animationEasing="ease-out"
                     />
-                    <Bar 
-                      dataKey="savings" 
-                      fill="#3B82F6" 
-                      radius={[4, 4, 0, 0]} 
-                      name="Savings" 
+                    <Bar
+                      dataKey="savings"
+                      fill="#3B82F6"
+                      radius={[4, 4, 0, 0]}
+                      name="Savings"
                       isAnimationActive={true}
                       animationDuration={1500}
                       animationEasing="ease-out"
                     />
-                    <Bar 
-                      dataKey="bank" 
-                      fill="#8B5CF6" 
-                      radius={[4, 4, 0, 0]} 
-                      name="Bank" 
+                    <Bar
+                      dataKey="bank"
+                      fill="#8B5CF6"
+                      radius={[4, 4, 0, 0]}
+                      name="Bank"
                       isAnimationActive={true}
                       animationDuration={1500}
                       animationEasing="ease-out"
@@ -263,10 +262,10 @@ export function AnalyticsCharts() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Expenses & Savings by Category</CardTitle>
+            <CardTitle>Income, Expenses & Bank by Category</CardTitle>
             <CardDescription>Breakdown of where your money goes</CardDescription>
           </CardHeader>
           <CardContent>
@@ -301,7 +300,7 @@ export function AnalyticsCharts() {
           </CardContent>
         </Card>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Cumulative Savings Trend</CardTitle>
@@ -309,30 +308,30 @@ export function AnalyticsCharts() {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] w-full">
-             {timeSeriesData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={timeSeriesData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.6)'}} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{fill: 'rgba(255,255,255,0.6)'}} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="cumulativeSavings" 
-                      stroke="#6366F1" 
-                      strokeWidth={4} 
-                      dot={{ r: 4, fill: "#6366F1", strokeWidth: 2, stroke: "#090D16" }} 
-                      activeDot={{ r: 6, fill: "#6366F1", strokeWidth: 0 }}
-                      name="Cumulative Savings" 
-                      isAnimationActive={true}
-                      animationDuration={2500}
-                      animationEasing="ease-in-out"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground">No data for this period</div>
-              )}
+            {timeSeriesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={timeSeriesData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val}`} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: 'rgba(9, 13, 22, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="cumulativeSavings"
+                    stroke="#6366F1"
+                    strokeWidth={4}
+                    dot={{ r: 4, fill: "#6366F1", strokeWidth: 2, stroke: "#090D16" }}
+                    activeDot={{ r: 6, fill: "#6366F1", strokeWidth: 0 }}
+                    name="Cumulative Savings"
+                    isAnimationActive={true}
+                    animationDuration={2500}
+                    animationEasing="ease-in-out"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">No data for this period</div>
+            )}
           </div>
         </CardContent>
       </Card>
