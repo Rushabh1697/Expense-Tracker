@@ -69,24 +69,42 @@ export function AnalyticsCharts() {
 
     const expenseChange = previousExpenses > 0 ? ((currentExpenses - previousExpenses) / previousExpenses) * 100 : 0
 
-    // Category Breakdown (Pie Chart)
-    const expensesByCategory = currentPeriodTxs
-      .filter(t => t.type === "expense" || t.type === "income" || t.type === "bank")
+    // For Top Category card (highest expense category)
+    const topCategoryAcc = currentPeriodTxs
+      .filter(t => t.type === "expense")
       .reduce((acc, t) => {
         acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount
         return acc
       }, {} as Record<string, number>)
+      
+    const topCategoryEntry = Object.entries(topCategoryAcc).sort((a, b) => b[1] - a[1])[0]
+    const topCategory = topCategoryEntry 
+      ? (categories.find(c => c.id === parseInt(topCategoryEntry[0]))?.name || "Unknown") 
+      : "N/A"
 
-    const pieData = Object.entries(expensesByCategory).map(([catId, amount]) => {
-      const cat = categories.find(c => c.id === parseInt(catId))
-      return {
-        name: cat?.name || "Unknown",
-        value: amount,
-        color: cat?.color || "#ccc"
+    // Pie Chart (Group by Type: Income, Expense, Bank)
+    const typeBreakdown = currentPeriodTxs
+      .filter(t => t.type === "expense" || t.type === "income" || t.type === "bank")
+      .reduce((acc, t) => {
+        acc[t.type] = (acc[t.type] || 0) + t.amount
+        return acc
+      }, {} as Record<string, number>)
+
+    const pieData = Object.entries(typeBreakdown).map(([type, amount]) => {
+      let name = "Unknown"
+      let color = "#ccc"
+      if (type === "income") {
+        name = "Income (Credited)"
+        color = "#10B981" // Emerald
+      } else if (type === "expense") {
+        name = "Expense (Debited)"
+        color = "#F43F5E" // Rose
+      } else if (type === "bank") {
+        name = "Bank"
+        color = "#8B5CF6" // Violet
       }
+      return { name, value: amount, color }
     }).sort((a, b) => b.value - a.value)
-
-    const topCategory = pieData[0]?.name || "N/A"
 
     // Time Series Data (Bar/Line Chart)
     const timeSeriesDataMap = currentPeriodTxs.reduce((acc, t) => {
@@ -265,8 +283,8 @@ export function AnalyticsCharts() {
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Income, Expenses & Bank by Category</CardTitle>
-            <CardDescription>Breakdown of where your money goes</CardDescription>
+            <CardTitle>Income, Expenses & Bank</CardTitle>
+            <CardDescription>Breakdown by transaction type</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
