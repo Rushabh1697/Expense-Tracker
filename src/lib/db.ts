@@ -59,10 +59,10 @@ export class ExpenseTrackerDB extends Dexie {
     // Define tables and indexes. 
     // We use id instead of ++id since we will manually assign UUIDs.
     this.version(3).stores({
-      transactions: 'id, date, categoryId, type, isSynced, isDeleted',
-      categories: 'id, type, isSynced, isDeleted',
-      savingsGoals: 'id, isSynced, isDeleted',
-      bankAccounts: 'id, isSynced, isDeleted'
+      transactions: '++id, date, categoryId, type, isSynced, isDeleted',
+      categories: '++id, type, isSynced, isDeleted',
+      savingsGoals: '++id, isSynced, isDeleted',
+      bankAccounts: '++id, isSynced, isDeleted'
     }).upgrade(async trans => {
       // Migrate old numeric IDs to UUIDs
       const categoryIdMap = new Map();
@@ -73,7 +73,11 @@ export class ExpenseTrackerDB extends Dexie {
         if (typeof cat.id === 'number') {
           const newId = uuidv4();
           categoryIdMap.set(cat.id.toString(), newId);
-          await trans.table('categories').update(cat.id, { id: newId, isDeleted: false, isSynced: false });
+          await trans.table('categories').delete(cat.id);
+          cat.id = newId;
+          cat.isDeleted = false;
+          cat.isSynced = false;
+          await trans.table('categories').add(cat);
         }
       }
 
@@ -83,12 +87,18 @@ export class ExpenseTrackerDB extends Dexie {
         if (typeof t.id === 'number' || typeof t.categoryId === 'number') {
           const newId = typeof t.id === 'number' ? uuidv4() : t.id;
           const mappedCatId = categoryIdMap.get(t.categoryId?.toString()) || t.categoryId?.toString();
-          await trans.table('transactions').update(t.id, { 
-            id: newId, 
-            categoryId: mappedCatId, 
-            isDeleted: false, 
-            isSynced: false 
-          });
+          
+          if (typeof t.id === 'number') {
+            await trans.table('transactions').delete(t.id);
+          } else {
+            await trans.table('transactions').delete(t.id); // delete string id to re-add just in case
+          }
+          
+          t.id = newId;
+          t.categoryId = mappedCatId;
+          t.isDeleted = false;
+          t.isSynced = false;
+          await trans.table('transactions').add(t);
         }
       }
 
@@ -96,7 +106,11 @@ export class ExpenseTrackerDB extends Dexie {
       const goals = await trans.table('savingsGoals').toArray();
       for (const g of goals) {
         if (typeof g.id === 'number') {
-          await trans.table('savingsGoals').update(g.id, { id: uuidv4(), isDeleted: false, isSynced: false });
+          await trans.table('savingsGoals').delete(g.id);
+          g.id = uuidv4();
+          g.isDeleted = false;
+          g.isSynced = false;
+          await trans.table('savingsGoals').add(g);
         }
       }
 
@@ -104,7 +118,11 @@ export class ExpenseTrackerDB extends Dexie {
       const accounts = await trans.table('bankAccounts').toArray();
       for (const a of accounts) {
         if (typeof a.id === 'number') {
-          await trans.table('bankAccounts').update(a.id, { id: uuidv4(), isDeleted: false, isSynced: false });
+          await trans.table('bankAccounts').delete(a.id);
+          a.id = uuidv4();
+          a.isDeleted = false;
+          a.isSynced = false;
+          await trans.table('bankAccounts').add(a);
         }
       }
     });
