@@ -66,12 +66,12 @@ export function BankAccountCard({ account }: BankAccountCardProps) {
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          {getIcon()}
-          <span className="truncate max-w-[120px]">{account.name}</span>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+        <CardTitle className="text-lg font-medium flex items-center gap-2 min-w-0">
+          <div className="shrink-0">{getIcon()}</div>
+          <span className="truncate">{account.name}</span>
         </CardTitle>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <div className="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-primary/10 text-primary hidden sm:block">
             {account.accountType}
           </div>
