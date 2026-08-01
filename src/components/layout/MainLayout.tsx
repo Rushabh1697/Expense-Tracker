@@ -85,6 +85,14 @@ export function MainLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto flex flex-col relative pb-16 md:pb-0 z-10 bg-transparent">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b bg-card/50 backdrop-blur-xl sticky top-0 z-20">
+          <h1 className="text-xl font-bold tracking-tight text-primary">Expenzo</h1>
+          <Button variant="ghost" size="icon" onClick={() => signOut()} className="text-muted-foreground">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+
         {!isOnline && (
           <div className="bg-amber-500/10 text-amber-500 text-xs text-center py-1 md:hidden">
             Offline Mode
