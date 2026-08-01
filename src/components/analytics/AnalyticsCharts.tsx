@@ -82,9 +82,9 @@ export function AnalyticsCharts() {
       ? (categories.find(c => c.id === parseInt(topCategoryEntry[0]))?.name || "Unknown") 
       : "N/A"
 
-    // Pie Chart (Group by Type: Income, Expense, Bank)
+    // Pie Chart (Group by Type: Income, Expense, Savings)
     const typeBreakdown = currentPeriodTxs
-      .filter(t => t.type === "expense" || t.type === "income" || t.type === "bank")
+      .filter(t => t.type === "expense" || t.type === "income" || t.type === "savings")
       .reduce((acc, t) => {
         acc[t.type] = (acc[t.type] || 0) + t.amount
         return acc
@@ -94,14 +94,14 @@ export function AnalyticsCharts() {
       let name = "Unknown"
       let color = "#ccc"
       if (type === "income") {
-        name = "Income (Credited)"
+        name = "Income"
         color = "#10B981" // Emerald
       } else if (type === "expense") {
-        name = "Expense (Debited)"
+        name = "Expense"
         color = "#F43F5E" // Rose
-      } else if (type === "bank") {
-        name = "Bank"
-        color = "#8B5CF6" // Violet
+      } else if (type === "savings") {
+        name = "Savings"
+        color = "#3B82F6" // Blue
       }
       return { name, value: amount, color }
     }).sort((a, b) => b.value - a.value)
@@ -283,7 +283,7 @@ export function AnalyticsCharts() {
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Income, Expenses & Bank</CardTitle>
+            <CardTitle>Income, Expenses & Savings</CardTitle>
             <CardDescription>Breakdown by transaction type</CardDescription>
           </CardHeader>
           <CardContent>
