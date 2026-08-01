@@ -35,6 +35,7 @@ export interface SavingsGoal {
 export interface BankAccount {
   id?: number;
   name: string;
+  accountNumber?: string;
   balance: number;
   accountType: 'checking' | 'savings' | 'credit' | 'other';
   isSynced: boolean;

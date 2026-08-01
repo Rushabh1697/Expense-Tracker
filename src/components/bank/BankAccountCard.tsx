@@ -65,8 +65,13 @@ export function BankAccountCard({ account }: BankAccountCardProps) {
         </div>
       </CardHeader>
       <CardContent>
+        {account.accountNumber && (
+          <div className="text-sm text-muted-foreground mt-1">
+            A/C: {account.accountNumber}
+          </div>
+        )}
         <div className="text-3xl font-bold mt-2">
-          ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          ₹{account.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </div>
       </CardContent>
       <CardFooter className="pt-2 flex justify-end gap-2">
@@ -103,7 +108,7 @@ export function BankAccountCard({ account }: BankAccountCardProps) {
               <div className="space-y-2">
                 <Label>Amount</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                  <span className="absolute left-3 top-2.5 text-muted-foreground">₹</span>
                   <Input 
                     type="number" 
                     step="0.01" 

@@ -24,7 +24,7 @@ export function Bank() {
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">Total Net Balance</p>
             <h3 className="text-4xl font-bold text-primary">
-              ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </h3>
           </div>
           <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center hidden sm:flex">

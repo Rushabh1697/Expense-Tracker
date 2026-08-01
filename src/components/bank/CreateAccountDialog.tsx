@@ -33,6 +33,7 @@ import {
 
 const accountSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  accountNumber: z.string().optional(),
   balance: z.coerce.number().min(0, 'Balance must be positive'),
   accountType: z.enum(['checking', 'savings', 'credit', 'other']),
 })
@@ -43,6 +44,7 @@ export function CreateAccountDialog() {
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: '',
+      accountNumber: '',
       balance: 0,
       accountType: 'checking',
     },
@@ -94,6 +96,19 @@ export function CreateAccountDialog() {
             />
             <FormField
               control={form.control}
+              name="accountNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Account Number (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. 1234567890" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="accountType"
               render={({ field }) => (
                 <FormItem>
@@ -123,7 +138,7 @@ export function CreateAccountDialog() {
                   <FormLabel>Initial Balance</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                      <span className="absolute left-3 top-2.5 text-muted-foreground">₹</span>
                       <Input type="number" step="0.01" className="pl-7" {...field} />
                     </div>
                   </FormControl>
