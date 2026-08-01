@@ -1,4 +1,5 @@
 import { BackupRestore } from "@/components/settings/BackupRestore"
+import { AppDownload } from "@/components/settings/AppDownload"
 
 export function Settings() {
   return (
@@ -9,6 +10,7 @@ export function Settings() {
       </div>
       
       <div className="grid gap-6">
+        <AppDownload />
         <BackupRestore />
       </div>
     </div>

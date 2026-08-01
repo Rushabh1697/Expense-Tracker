@@ -49,16 +49,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Periodic sync every 30 seconds
     const intervalId = setInterval(() => {
-      if (user) {
-        syncAll()
-      }
+      syncAll() // syncAll already checks for session internally
     }, 30000)
 
     return () => {
       subscription.unsubscribe()
       clearInterval(intervalId)
     }
-  }, [user])
+  }, [])
 
   const signOut = async () => {
     await supabase.auth.signOut()
